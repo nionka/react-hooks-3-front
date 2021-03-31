@@ -5,7 +5,6 @@ import LoginForm from '../LoginForm/LoginForm';
 import News from '../News/News';
 import useStorage from '../../hooks/useStorage';
 
-
 function Landing() {
     const [news, setNews] = useState();
     const [error, setError] = useState(null);
@@ -14,16 +13,16 @@ function Landing() {
 
     useEffect(() => {
         if (token) {
-            const prof = async() => {
+            const prof = async(url, state) => {
                 try {
-                    const response = await fetch(`${process.env.REACT_APP_URL}/private/me`, {headers: {Authorization: `Bearer ${token}`}})
+                    const response = await fetch(url, {headers: {Authorization: `Bearer ${token}`}})
                     
                     if (!response.ok) {
                         throw new Error('Что-то пошло не так!!!');
                     }
                     const json = await response.json()
 
-                    setProfile(json)
+                    state(json)
                     setError(null)
 
                 } catch(err) {
@@ -37,40 +36,42 @@ function Landing() {
                     setToken(null)
                 }
             }
-            prof()
+            prof(`${process.env.REACT_APP_URL}/private/me`, setProfile);
+            prof(`${process.env.REACT_APP_URL}/private/news`, setNews);
         }
     }, [token])
 
-    useEffect(() => {
-        if (token) {
-            const prof = async() => {
-                try {
-                    const response = await fetch(`${process.env.REACT_APP_URL}/private/news`, {headers: {Authorization: `Bearer ${token}`}})
-                    const json = await response.json()
+    // useEffect(() => {
+    //     if (token) {
+    //         const prof = async() => {
+    //             try {
+    //                 const response = await fetch(`${process.env.REACT_APP_URL}/private/news`, {headers: {Authorization: `Bearer ${token}`}})
+    //                 const json = await response.json()
 
-                    if (!response.ok) {
-                        throw new Error('Что-то пошло не так')
-                    }
+    //                 if (!response.ok) {
+    //                     throw new Error('Что-то пошло не так')
+    //                 }
 
-                    setNews(json)
-                    setError(null)
+    //                 setNews(json)
+    //                 setError(null)
 
-                } catch(err) {
+    //             } catch(err) {
 
-                    if (err.name === 'TypeError') {
-                        setError('Сервер не отвечает')
-                    } else {
-                        setError(err.message)
-                    }
-                    setProfile(null)
-                    setToken(null)
-                }
-            }
-            prof()
-        }
-    }, [token])
+    //                 if (err.name === 'TypeError') {
+    //                     setError('Сервер не отвечает')
+    //                 } else {
+    //                     setError(err.message)
+    //                 }
+    //                 setProfile(null)
+    //                 setToken(null)
+    //             }
+    //         }
+    //         prof()
+    //     }
+    // }, [token])
 
     const onAuth = async (form) => {
+    
         try {
             const response = await fetch(`${process.env.REACT_APP_URL}/auth`, {
                 method: 'POST',
